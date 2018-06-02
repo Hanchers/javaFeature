@@ -33,8 +33,6 @@ package java8.grammar;
 
 import java.net.URL;
 import java.util.Base64;
-import java.util.Base64.Encoder;
-import java.util.Base64.Decoder;
 
 class Base64Sample {
     public static void main(String args[]){

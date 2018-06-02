@@ -36,6 +36,7 @@ package java8.grammar;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.Base64;
 
@@ -43,11 +44,10 @@ public class Base64Sample2 {
     private static final int LINELENGTH = 16;
 
     public static void main(String args[]) throws IOException, FileNotFoundException {
-
         try{
             byte[] originalfile = Files.readAllBytes(Paths.get("plain.txt"));
             //encoding of the file using a ByteArray
-            Base64.Encoder enc = Base64.getEncoder(LINELENGTH,"\\".getBytes());
+            Base64.Encoder enc = Base64.getMimeEncoder(LINELENGTH,"\\".getBytes());
             byte[] encfile = enc.encode(originalfile);
 
             System.out.println("Original file:");
@@ -63,7 +63,7 @@ public class Base64Sample2 {
             System.out.println("Base64 Decoded String: " + new String(decfile));
         }
 
-        catch(FileNotFoundException e)
+        catch(NoSuchFileException e)
         {
             System.out.println("File Not Found");
         }
