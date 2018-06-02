@@ -231,12 +231,28 @@ public class TestStream {
         System.out.println(Arrays.stream(integers).collect(reducing(Integer::sum)).orElse(0));
 
         System.out.println("集合中的名字,名字-长度分组");
-        Map map = list.stream().collect(groupingBy(e->e));
-        System.out.println(map);
+        System.out.println(list.stream().collect(groupingBy(e->e,mapping(String::length,summingInt(Integer::intValue)))));
 //        System.out.println(list.stream().collect(groupingBy(e->e.charAt(0),HashMap::new,joining("-"))));//此处类型推断失败，因为没有返回值
 
-        System.out.println("按");
+        System.out.println("按集合中名字的长度分区");
+        System.out.println(list.stream().collect(partitioningBy(e->e.length()>5)));
+        //分组是按给定的条件分组，分区是按true,false分组
 
+        //如果Collector工具类不满足需要，还可以自己定制
+        //参数说明：
+        //参数1，supplier ，生产者，提供容器或者初始值
+        //参数2，accumulator(s,e),其中s为参数1产生的值，e为集合中的元素
+        //参数3，combiner ，同reduce一样，用于连接多线程中不同的子任务结果。
+        System.out.println("实现集合中名字的join连接");
+        StringBuilder result = list.stream().collect(StringBuilder::new,(builder,e)->{
+            if (builder.length() == 0) {
+                builder.append(e);
+            } else {
+                builder.append(",").append(e);
+            }
+        },StringBuilder::append);
+        System.out.println(result.toString());
+        System.out.println(list.stream().collect(new TestCollector()));
 
     }
 
@@ -244,6 +260,9 @@ public class TestStream {
      * 测试：并行流
      */
     public static void testParallel(){
+        String[] stringArray = { "Barbara", "James", "Mary", "John", "Patricia", "Robert", "Michael", "Linda" };
+        Integer[] integers = {1,11,111,4,56,57,5,7,6,45,344,5,7655,3};
+        List<String> list = Arrays.asList(stringArray);
 
     }
 
