@@ -13,7 +13,7 @@ import java.util.Objects;
  * @since 1.0
  */
 @FunctionalInterface
-public interface TestInterface {
+public interface TestInterface<T> {
     /**
      * 验证一个对象是否合法
      * @param
@@ -22,7 +22,7 @@ public interface TestInterface {
      * @since 1.0
      * @return
      */
-    boolean validate(Object o);
+    boolean validate(T o);
 
     /**
      * 判断对象是否为空
@@ -32,7 +32,7 @@ public interface TestInterface {
      * @since 1.0
      * @return
      */
-    default boolean validateNull(Object o) {
+    default boolean validateNull(T o) {
         return Objects.isNull(o);
     }
 
@@ -47,8 +47,10 @@ public interface TestInterface {
     static boolean validateNullStr(Object o) {
         if (Objects.isNull(o)) {
             return true;
-        }else {
+        }else if (o instanceof String){
             return ((String)o).isEmpty();
         }
+
+        return false;
     }
 }
