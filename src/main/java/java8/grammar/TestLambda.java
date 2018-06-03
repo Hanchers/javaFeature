@@ -1,4 +1,13 @@
 package java8.grammar;
+
+import java8.model.TestModel8;
+
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
 /**
  * 函数式编程：lambda
  * 以Comparator接口为例
@@ -10,6 +19,75 @@ package java8.grammar;
  */
 public class TestLambda {
     public static void main(String[] args) {
+        //Lambda 演化  testInterface
+        //before java8
+        TestInterface<String> t1 = new TestInterface<String>() {
+            @Override
+            public boolean validate(String o) {
+                return o.isEmpty();
+            }
+        };
 
+        //in java8
+        TestInterface<String> t2 =(String o) -> {
+          return  o.isEmpty();
+        };
+        TestInterface<String> t3 = (String o) -> o.isEmpty();
+        TestInterface<String> t4 = o -> o.isEmpty();
+        TestInterface<String> t5 = String::isEmpty;
+        TestInterface<String> t6 = TestInterface::validateNullStr;
+
+//        normalLambda();
+        lambdaDemo();
     }
+
+    public static void normalLambda(){
+        //常用的Lambda
+        //开启线程
+        System.out.println(Thread.currentThread().getName());
+        new Thread(()->System.out.println(Thread.currentThread().getName())).start();
+
+        System.out.println("=============================");
+
+        //排序比较
+        List<Integer> list = Arrays.asList(12,4,65,34,232,54,6,7,54,2,78);
+        list.forEach(e->System.out.print(e+","));
+        list.sort(((o1, o2) -> o1.compareTo(o2)));
+//        list.sort((Integer::compareTo));
+        System.out.println();
+        list.forEach(e->System.out.print(e+","));
+
+        //生产者 Supplier函数接口 ：负责从无到有
+        Supplier<Map> supplier = ()->new HashMap();
+        //操作者 Function函数接口 ：负责对数据的操作
+        Function<String,Integer> function = s -> s.length();
+        //消费者 Consumer函数接口 : 负责从有到无
+        Consumer consumer = e->System.out.println(e);
+        //判断者 Predicate函数接口：判断是否符合条件
+        Predicate predicate = t -> Objects.isNull(t);
+
+        //等等
+    }
+
+    public static void lambdaDemo(){
+        TestModel8 testModel8 = new TestModel8("a",1);
+
+        System.out.println("before java8, name is a ? :"+testModel8.validate(new TestInterface<TestModel8>() {
+            @Override
+            public boolean validate(TestModel8 o) {
+                return o.getName().equals("a");
+            }
+        }));
+
+        //判断是否是a
+        System.out.println("name is a?:"+testModel8.validate( o ->o.getName().equals("a") ));
+        System.out.println("name is a?:"+testModel8.validate( o ->o.getName().equals("b") ));
+        //判断值
+        System.out.println("value > 0?:"+testModel8.validate( o ->o.getValue()>0 ));
+        System.out.println("value > 1?:"+testModel8.validate( o ->o.getValue()>1 ));
+        //判断空
+        TestInterface<String> t6 = TestInterface::validateNullStr;
+        System.out.println("name is null ? :"+t6.validate(testModel8.getName()));
+    }
+
 }
