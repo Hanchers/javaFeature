@@ -37,7 +37,7 @@ public class TestCollector implements Collector<String, StringBuilder, String> {
 
     @Override
     public BinaryOperator<StringBuilder> combiner() {
-        return StringBuilder::append;
+        return (c1,c2)->c1.append("+++").append(c2);
     }
 
     @Override

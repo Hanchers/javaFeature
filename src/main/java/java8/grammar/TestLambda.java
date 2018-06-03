@@ -2,8 +2,11 @@ package java8.grammar;
 
 import java8.model.TestModel8;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * 函数式编程：lambda
@@ -54,12 +57,16 @@ public class TestLambda {
         System.out.println();
         list.forEach(e->System.out.print(e+","));
 
-        //生产者
-        //操作者
-        //操作者BiFunction
-        //消费者Consumer函数接口 t->void accept(t)
-        //Predicate
+        //生产者 Supplier函数接口 ：负责从无到有
+        Supplier<Map> supplier = ()->new HashMap();
+        //操作者 Function函数接口 ：负责对数据的操作
+        Function<String,Integer> function = s -> s.length();
+        //消费者 Consumer函数接口 : 负责从有到无
+        Consumer consumer = e->System.out.println(e);
+        //判断者 Predicate函数接口：判断是否符合条件
+        Predicate predicate = t -> Objects.isNull(t);
 
+        //等等
     }
 
     public static void lambdaDemo(){
