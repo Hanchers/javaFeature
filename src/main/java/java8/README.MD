@@ -23,7 +23,7 @@ BoxDemo.addBox(Integer.valueOf(20), listOfIntegerBoxes); //java8
 总之：java8中可以更好的通过泛型等方式，推断出方法的入参、声明中的实际参数，从而省略一些繁琐的代码。
 
 ##### 1.2 方法引用
-顾名思义，就是通过方法名的方式来实现对方法的调用。  
+顾名思义，就是通过方法名的方式来实现对方法的引用。一种特殊的Lambda表达式。  
 目前，共有四种类型的方法引用:
 类型 | 例子 
 ---|---
@@ -32,6 +32,11 @@ BoxDemo.addBox(Integer.valueOf(20), listOfIntegerBoxes); //java8
 类的成员方法引用 | Class::methodName
 类的构造器引用 | Class::new
 
+使用场景： 
+
+ 
+
+总之，函数引用就是一种特殊的函数表达式，其将一些特殊的函数引用的使用再一次简化了。其也是一种代码块的传递，而不是传统的方法调用。  
 
 ##### 1.3 接口默认方法+静态方法 
 java8之前，在接口中只能定义方法的声明，不能有方法的实现。但是，这样的规定也限制了java功能的扩展与升级，因为每增加一个方法就要对很多实现类改造。  
@@ -60,14 +65,15 @@ public interface TestInterface {
 
 ##### 1.4 Lambda 表达式(敲黑板) 
 Lambda表达式（也称为闭包）是Java 8中最大和最令人期待的语言改变。它允许我们将函数当成参数传递给某个方法，或者把代码本身当作数据处理：函数式开发者非常熟悉这些概念。很多JVM平台上的语言（Groovy、Scala等）从诞生之日就支持Lambda表达式，但是Java开发者没有选择，只能使用匿名内部类代替Lambda表达式。所以Lambda表达式可以用来代替繁琐难看的匿名内部类。可以说，java8中上面几点的改进，就是为Lambda表达式做铺垫。  
-使用方式：()->{}  
+使用方式：()->{}； (入参)->{实现体}   
 先决条件：需要有函数接口或类函数接口的实现  
 函数接口：只有一个抽象方法的接口就是函数接口，为了防止接口被误添方法，可以通过@FunctionalInterface来加强。默认方法对此不影响。  
 优势：  
 1. 代码传递！java除值传递外又多了一种传递方式。实现了代码的定制化。
 2. 取代匿名内部类  
 3. 简化代码风格，实现良好的可读性 ，毕竟代码最终还是给人读的。
-4. 未完待续  
+4. 一个方法，如果入参是一个函数接口，可以当作这个方法是这个接口实现的变种，而具体的实现方式由未来指定，实现了程序设计时间上的先后分离，算是特殊意义上的“懒加载”，只不过“懒加载”的不是数据，而是实现逻辑，是业务流程，是程序流。  
+5. 这种“代码的懒加载”方式，对于系统的架构提供了极大的便利。  
 以Comparator接口示例：
 
 ```java
@@ -90,7 +96,7 @@ public interface Comparator<T> {
 @Alert(role="Administrator")
 public class UnauthorizedAccessException extends SecurityException { ... }
 ```
-
+注意：只有标识@Repeatable 的注解才能重复使用
 
 ##### 1.6 注解几乎可以用在地方
 在java8之前，注解仅能用于**声明**;  
@@ -167,9 +173,9 @@ Stream.of("a", "b", "c");
     - reduce（归约）
     - findAny(查找到元素)
     - findFirst(查找到第一个元素)：并行时与findAny有区别
-    - allMatch(所有数据满足条件)
+    - allMatch(所有数据都满足条件)
     - anyMatch(任意数据满足条件)
-    - noneMatch(没有数据满足条件)
+    - noneMatch(所有数据都不满足条件)
     - min(找到最小的元素)
     - max(找到最大的元素)  
 
@@ -227,7 +233,8 @@ time类的通用方法：
 
 最后提个问题：如果要国际化，各地的时间该怎么处理？
 
-[官方API](https://docs.oracle.com/javase/8/docs/technotes/guides/datetime/index.html)
+[官方API](https://docs.oracle.com/javase/8/docs/technotes/guides/datetime/index.html)  
+[一个很棒的博客](http://www.importnew.com/14857.html)
 
 #### 4、杂
 ##### 4.1 Javascript引擎由Rhino 换为Nashorn
@@ -255,11 +262,12 @@ Result: 2
 但是并不意味着内存溢出异常没有了。
 ##### 4.4 接口的默认方法是由字节码层级支持的
 ##### 4.5 hashmap性能优化
+如：桶模式换成了红黑树
 
 
 #### X.总结
 1. java8的这次重大升级可以说完全是围绕着Lambda表达式和Stream流这两个核心来实现的。
-2. 总的来说java8的这次升级，并没有提供很突出的特性，只能说拉平了与其他语言的差距。
+2. 总的来说java8的这次升级，并没有提供很突出的特性，只能说拉平了与其他语言的差距，所以还是要积极使用的。
 3. 使用java8的新特性，确实能够使代码变得简介美观。
 4. 
 

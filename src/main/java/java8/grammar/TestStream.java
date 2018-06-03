@@ -4,8 +4,12 @@ package java8.grammar;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,8 +27,11 @@ import static java.util.stream.Collectors.*;
 public class TestStream {
     public static void main(String[] args) {
 //        testCreat();
-        testProcess();
-        testCollect();
+//        testProcess();
+//        testCollect();
+//        testParallel();
+        testCombine();
+        testOthers();
     }
 
     /**
@@ -260,9 +267,49 @@ public class TestStream {
      * 测试：并行流
      */
     public static void testParallel(){
-        String[] stringArray = { "Barbara", "James", "Mary", "John", "Patricia", "Robert", "Michael", "Linda" };
-        Integer[] integers = {1,11,111,4,56,57,5,7,6,45,344,5,7655,3};
+        String[] stringArray = { "Barbara", "James", "Mary", "John", "Patricia", "Robert", "Michael", "Linda" ,"Hancher"};
+        Integer[] integers = {11,11,111,4,56,57,5,7,6,45,344,5,7655,3};
         List<String> list = Arrays.asList(stringArray);
+
+        //并行流，底层是依托于一个与当前计算机核数一致的ForkJoinPool线程池来处理，通过分支/合并（fork/join）算法，将不同的任务分到不同的线程中处理
+        //对于流来说，所有以parallel开头的都是多线程处理
+        System.out.println("多线程输出集合中的名字");
+        list.parallelStream().forEach(e->System.out.print(e+","));
+
+        System.out.println("\n-----------------华丽的分割线------------------\n");
+        System.out.println("多线程处理，但是有序输出集合中的名字");
+        list.parallelStream().forEachOrdered(e->System.out.print(e+","));
+
+        System.out.println("\n-----------------华丽的分割线------------------\n");
+        System.out.println("当前有几个线程："+Runtime.getRuntime().availableProcessors());
+        Arrays.stream(integers).parallel().forEach(e-> System.out.println(Thread.currentThread().getName()+":"+e));
+
+        System.out.println("\n-----------------华丽的分割线------------------\n");
+        System.out.println("先串行，再并行");
+        list.stream().peek(e->System.out.print(Thread.currentThread().getName())).parallel().forEach(e->System.out.println(":"+e));
+        System.out.println("先并行，再串行");
+        list.parallelStream().peek(e->System.out.print(Thread.currentThread().getName())).sequential().forEach(e->System.out.println(":"+e));
+        //综上可知，流到达是串行还是并行，取决于最后的parallel，sequential方法。
+
+        System.out.println("\n-----------------华丽的分割线------------------\n");
+        System.out.println("查找任意一个与查找第一个");
+        System.out.println("findFirst："+list.parallelStream().findFirst());
+        System.out.println("findAny："+list.parallelStream().findAny());
+
+        System.out.println("\n-----------------华丽的分割线------------------\n");
+        System.out.println("关于排序");
+        System.out.println("原始数据：");
+        Arrays.stream(integers).forEachOrdered(e->System.out.print(e+","));
+        System.out.println("\n并行去重排序数据：");
+        Arrays.stream(integers).distinct().sorted().parallel().forEachOrdered(e->System.out.print(e+","));
+
+        System.out.println("\n-----------------华丽的分割线------------------\n");
+        System.out.println("reduce的第三个参数");
+        System.out.println(list.parallelStream().reduce("这是奇点",(o1,o2)->o1+"-"+o2,(c1,c2)->c1+"+++"+c2));
+
+        System.out.println("\n-----------------华丽的分割线------------------\n");
+        System.out.println("collect的第三个参数");
+        System.out.println(list.parallelStream().collect(new TestCollector()));
 
     }
 
@@ -270,10 +317,63 @@ public class TestStream {
      * 测试：探索Lambda的级联操作
      */
     public static void testCombine(){
+        String[] stringArray = { "Barbara", "James", "Mary", "John", "Patricia", "Robert", "Michael", "Linda" ,"Hancher"};
+        List<String> list = Arrays.asList(stringArray);
+
+        System.out.println("测试lamb级联操作");
+        //过滤掉
+        Predicate<String> predicate = e->e.contains("a");
+        predicate = predicate.and(e->e.contains("r"));
+
+        Consumer<String> consumer = System.out::print;
+        consumer = consumer.andThen(e->System.out.print(","));
+        list.stream().filter(predicate).forEach(consumer);
 
     }
 
     public static void testOthers() {
+        System.out.println("测试并发流的多线程堵塞问题");
 
+        Runnable r1 = ()->{
+            String[] stringArray = { "Barbara", "James", "Mary", "John", "Patricia", "Robert", "Michael", "Linda" ,"Hancher"};
+            List<String> list = Arrays.asList(stringArray);
+
+            System.out.println("开启第一个并发流，并长时间占用线程池");
+            long start = System.currentTimeMillis();
+            list.parallelStream().forEach(e->{
+                System.out.println(Thread.currentThread().getName()+"::"+e);
+                //开始处理费时任务
+                sleepSecond(10);//休息10s
+            });
+            System.out.println("第一个并发流耗时："+(System.currentTimeMillis()-start));
+        };
+
+        Runnable r2 = ()->{
+            Integer[] integers = {11,11,111,4,56,57,5,7,6,45,344,5,7655,3};
+
+            System.out.println("开启第二个并发流，也会长时间占用线程池");
+            long start = System.currentTimeMillis();
+            Arrays.stream(integers).parallel().forEach(e->{
+                System.out.println(Thread.currentThread().getName()+"::"+e);
+                //开始处理费时任务
+                sleepSecond(10);//休息10s
+            });
+            System.out.println("第二个并发流耗时："+(System.currentTimeMillis()-start));
+        };
+
+        new Thread(r1).start();
+        new Thread(r2).start();
+
+        //由此可以看出，多个并发流是共享一个线程池的，这样做正常的网站使用中，如果使用不当，会造成大量的线程等待、堵塞。
+        //所以，并发流慎用。如果有需求的话，自己单开线程池处理。
+
+    }
+
+    public static void sleepSecond(int second) {
+        try {
+            Thread.sleep(second*1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
