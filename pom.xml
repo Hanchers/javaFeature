@@ -23,6 +23,7 @@
     <modules>
         <module>java9-order</module>
         <module>java9-goods</module>
+        <module>java-source</module>
     </modules>
 
 
